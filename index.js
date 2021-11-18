@@ -1,5 +1,5 @@
-const ping = require ("net-ping");
-const dns = require ("dns");
+const ping = require ('net-ping');
+const dns = require ('dns');
 const plugin = require('ih-plugin-api')();
 
 const session = ping.createSession();
