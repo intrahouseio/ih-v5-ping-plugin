@@ -1,28 +1,16 @@
 const ping = require ("net-ping");
 const dns = require ("dns");
+const plugin = require('ih-plugin-api')();
 
-const Plugin = require('./lib/plugin');
-
-const plugin = new Plugin();
 const session = ping.createSession();
 
+
+let opt = {};
+let settings = {};
+let channels = [];
+
+
 const DATA = {};
-
-let debug = false;
-
-
-plugin.on('params', params => {
-
-});
-
-plugin.on('channels', channels => {
-  getIPtoHost(channels)
-  .then(start)
-});
-
-plugin.on('debug', mode => {
-  debug = mode
-});
 
 function getIP(channel) {
   return new Promise(resolve => {
@@ -44,14 +32,14 @@ function getIPtoHost(channels) {
 
 function check(ip, id) {
   if (DATA[ip].error > DATA[ip].lost) {
-    debug && plugin.debug(`${id} ${ip}: offline`);
-    plugin.setChannelsData([{ id, value: 0, ext: {} }]);
+    plugin.log(`${id} ${ip}: offline`);
+    plugin.sendData([{ id, value: 0, ext: {} }]);
 
     DATA[ip].error = 0;
   } else {
     if (DATA[ip].error === 0) {
-      debug && plugin.debug(`${id} ${ip}: online `);
-      plugin.setChannelsData([{ id, value: 1, ext: {} }]);
+      plugin.log(`${id} ${ip}: online `);
+      plugin.sendData([{ id, value: 1, ext: {} }]);
 
       DATA[ip].error = 0;
     }
@@ -73,12 +61,18 @@ function createPinger(id, ip, interval, lost) {
   session.pingHost(ip, (err, ip) => response(err, ip, id));
 }
 
+async function main() {
+  opt = plugin.opt;
+  settings = await plugin.params.get();
+  channels = await plugin.channels.get();
 
-function start(items) {
-  plugin.debug("version: 5.0.1");
-  plugin.debug("start");
-  plugin.debug("hosts: " + items.length);
-  items.forEach(item => {
-    createPinger(item.id, item.ip, item.interval, item.lost);
-  });
+  getIPtoHost(channels)
+    .then((items) => {
+      items.forEach(item => {
+        createPinger(item.id, item.ip, item.interval, item.lost);
+      });
+    });
 }
+
+
+main();
