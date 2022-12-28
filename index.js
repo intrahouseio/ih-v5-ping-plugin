@@ -1,14 +1,13 @@
 const ping = require ('net-ping');
 const dns = require ('dns');
-const plugin = require('ih-plugin-api')();
 
+// const plugin = require('ih-plugin-api')();
 const session = ping.createSession();
 
-
+let plugin;
 let opt = {};
 let settings = {};
 let channels = [];
-
 
 const DATA = {};
 
@@ -62,6 +61,16 @@ function createPinger(id, ip, interval, lost) {
 }
 
 async function main() {
+  try {
+    const argv = JSON.parse(process.argv[2]); //
+    const pluginapi = argv && argv.pluginapi ? argv.pluginapi : 'ih-plugin-api';
+   
+    plugin = require(pluginapi+'/index.js')();
+  } catch (e) {
+    console.log('ERROR: Missing or invalid pluginapi path')
+    process.exit(1);
+  }
+  
   opt = plugin.opt;
   settings = await plugin.params.get();
   channels = await plugin.channels.get();
