@@ -31,13 +31,13 @@ function getIPtoHost(channels) {
 
 function check(ip, id) {
   if (DATA[ip].error > DATA[ip].lost) {
-    plugin.log(`${id} ${ip}: offline`);
+    plugin.log(`${id} ${ip}: offline`, 1);
     plugin.sendData([{ id, value: 0 }]);
 
     DATA[ip].error = 0;
   } else {
     if (DATA[ip].error === 0) {
-      plugin.log(`${id} ${ip}: online `);
+      plugin.log(`${id} ${ip}: online `, 1);
       plugin.sendData([{ id, value: 1 }]);
 
       DATA[ip].error = 0;
